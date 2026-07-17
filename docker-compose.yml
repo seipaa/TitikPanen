@@ -1,0 +1,74 @@
+version: "3.9"
+
+services:
+  # --- AgroMesh AI Backend ---
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    container_name: agromesh-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./agromesh.db
+      - SECRET_KEY=${SECRET_KEY:-your-super-secret-key-change-in-production}
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=1440
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-minioadmin}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-minioadmin}
+      - MINIO_BUCKET=${MINIO_BUCKET:-agromesh-images}
+      - MINIO_SECURE=false
+      - AI_API_URL=${AI_API_URL:-http://localhost:8001/predict}
+      - AI_API_KEY=${AI_API_KEY:-}
+      - BMKG_API_URL=https://api.bmkg.go.id
+      - CORS_ORIGINS=http://localhost:3001
+    volumes:
+      - ./apps/backend:/app
+      - agromesh-uploads:/app/uploads
+    depends_on:
+      - minio
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped
+
+  # --- AgroMesh AI Frontend (Next.js) ---
+  frontend:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: agromesh-frontend
+    ports:
+      - "3001:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # --- MinIO Object Storage ---
+  minio:
+    image: minio/minio:latest
+    container_name: agromesh-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY:-minioadmin}
+    volumes:
+      - agromesh-minio-data:/data
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+
+  # --- MinIO Init (create bucket on startup) ---
+  minio-init:
+    image: minio/mc:latest
+    container_name: agromesh-minio-init
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c " sleep 5; mc alias set myminio http://minio:9000 $${MINIO_ACCESS_KEY:-minioadmin} $${MINIO_SECRET_KEY:-minioadmin}; mc mb myminio/$${MINIO_BUCKET:-agromesh-images} --ignore-existing; mc anonymous set download myminio/$${MINIO_BUCKET:-agromesh-images}; echo 'MinIO bucket ready'; exit 0; "
+
+volumes:
+  agromesh-uploads:
+  agromesh-minio-data:
