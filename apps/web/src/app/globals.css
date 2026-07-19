@@ -50,3 +50,18 @@
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
 }
+
+/* Loading Bar Animation */
+@keyframes loading-bar {
+    0% { transform: translateX(-100%); }
+    50% { transform: translateX(50%); }
+    100% { transform: translateX(300%); }
+}
+.animate-loading-bar {
+    animation: loading-bar 1.5s infinite ease-in-out;
+}
+
+/* Hide Leaflet Attribution & Logo */
+.leaflet-control-attribution {
+    display: none !important;
+}

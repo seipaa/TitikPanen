@@ -24,10 +24,27 @@ export default function DashboardLayout({
     // Show loading spinner while checking auth
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-600 border-t-transparent mx-auto mb-4"></div>
-                    <p className="text-gray-500 text-sm">Memeriksa autentikasi...</p>
+            <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-100 flex flex-col items-center justify-center p-4">
+                <div className="relative flex flex-col items-center">
+                    {/* Logo container with pulse & glow animation */}
+                    <div className="relative mb-6">
+                        {/* Glow background ring */}
+                        <div className="absolute inset-0 bg-green-400 rounded-2xl filter blur-xl opacity-40 animate-pulse"></div>
+                        {/* Outer rotating/scaling border */}
+                        <div className="absolute -inset-1.5 border-2 border-green-600/30 rounded-2xl animate-[spin_6s_linear_infinite] scale-105"></div>
+                        {/* The animated Logo card */}
+                        <div className="relative bg-white/70 backdrop-blur-md p-5 rounded-2xl shadow-xl border border-white/40 animate-[bounce_2s_infinite_ease-in-out]">
+                            <img src="/logo.png" alt="TitikPanen Logo" className="w-16 h-16 object-contain" />
+                        </div>
+                    </div>
+                    {/* Brand & Tagline */}
+                    <h2 className="text-2xl font-black text-slate-800 tracking-tight">TitikPanen</h2>
+                    <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Regional Harvest Intelligence</p>
+                    
+                    {/* Premium horizontal loading bar */}
+                    <div className="w-36 bg-slate-200/60 rounded-full h-1.5 mt-8 overflow-hidden relative">
+                        <div className="absolute top-0 bottom-0 bg-green-600 w-1/3 rounded-full animate-loading-bar"></div>
+                    </div>
                 </div>
             </div>
         );
@@ -52,6 +69,7 @@ export default function DashboardLayout({
                             <Menu size={24} />
                         </button>
                         <div className="flex items-center gap-2">
+                            <img src="/logo.png" alt="TitikPanen Logo" className="w-8 h-8 object-contain rounded-lg" />
                             <div>
                                 <h1 className="font-bold text-gray-900 text-lg leading-tight">TitikPanen</h1>
                                 <p className="text-xs text-gray-500">Regional Harvest Intelligence</p>
